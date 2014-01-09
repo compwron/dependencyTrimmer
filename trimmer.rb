@@ -1,12 +1,4 @@
-def procdir(dir)
-  Dir[File.join(dir, '**', '*')].reject { |p|
-    File.directory? p
-  }.reject { |p|
-    !p.include?(".gradle")
-  }.reject {|p|
-    p.include?("/out/")
-  }
-end
+require_relative 'lib/gradle_files'
 
 def clean_dependencies(dependencies)
   dependencies.map { |dep|
@@ -22,7 +14,7 @@ def pretty_duplicates(dup_hash)
   }.join("\n")
 end
 
-gradles = procdir(ARGV[0] || ".")
+gradles = GradleFiles.new(ARGV[0] || ".").files
 
 puts "Detected gradle files: \n#{gradles.join("\n")}\n\n"
 dependencies = gradles.map { |filepath|
