@@ -1,0 +1,19 @@
+repositories {
+    mavenCentral()
+}
+
+project.buildDir = 'target'
+
+apply plugin: 'java'
+
+apply from: 'gradle/localDeploy.gradle'
+apply from: 'gradle/seedData.gradle'
+
+dependencies{
+	testCompile 'junit:junit:4.11'
+	compile "org.mongodb:mongo-java-driver:2.11.1"
+}
+
+task otherTask(){
+	println("Should not run loadSeedData")
+}
