@@ -6,7 +6,7 @@ def procdir(dir)
 end
 
 # assuming that this is being run from current directory
-gradles = procdir(".")
+gradles = procdir(ARGV[0] || ".")
 
 dependencies = gradles.map { |filepath|
   file = File.open(filepath, "rb")
@@ -14,18 +14,20 @@ dependencies = gradles.map { |filepath|
   contents.reject { |line|
     !line.include?("ompile")
   }
-}
+}.flatten
 
 def clean_dependencies(dependencies)
 #  Return just the bit between the quotes
-  dependencies
+  dependencies.map {|dep|
+    dep.scan(/\.*'(.*)\'/)
+  }.flatten
 end
 
 clean = clean_dependencies(dependencies)
 
 duplicates = clean.select{|dep| clean.count(dep) > 1}.uniq
 
-p "Possible duplicate dependencies: #{duplicates}"
+puts "Possible duplicate dependencies: #{duplicates.join("\n")}" # maybe add file that they are found in to this?
 
 # Possible problem: using gsub will remove all of one dependencies - so duplicates will go undetected.
 
