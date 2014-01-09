@@ -1,39 +1,13 @@
 require_relative 'lib/gradle_files'
+require_relative 'lib/dependencies'
 
-def clean_dependencies(dependencies)
-  dependencies.map { |dep|
-    dep.scan(/["|'](.*:.*):.*["|']/)
-  }.flatten
-end
+gradles = GradleFiles.new(ARGV[0] || ".")
 
-def pretty_duplicates(dup_hash)
-  dup_hash.select { |dup_name, dup_count|
-    dup_count != 1
-  }.map { |dup_name, dup_count|
-    "found #{dup_count} times: #{dup_name}"
-  }.join("\n")
-end
+puts "Detected gradle files: \n#{gradles.pretty}\n\n"
 
-gradles = GradleFiles.new(ARGV[0] || ".").files
-
-puts "Detected gradle files: \n#{gradles.join("\n")}\n\n"
-dependencies = gradles.map { |filepath|
-  file = File.open(filepath, "rb")
-  content_lines = file.read.split("\n")
-  clean_dependencies(content_lines)
-}.flatten
+dependencies = Dependencies.new(gradles.files)
 
 puts "Detected #{dependencies.count} dependencies:
-     \n#{dependencies.join("\n")}\n"
+     \n#{dependencies.pretty}\n"
 
-duplicates = {}
-
-dependencies.each { |dep|
-  if (duplicates[dep] == nil) then
-    duplicates.merge!({dep => 1})
-  else
-    duplicates[dep] += 1
-  end
-}
-
-puts "\nPossible duplicate dependencies: \n#{pretty_duplicates(duplicates)}"
+puts "\nPossible duplicate dependencies: \n#{dependencies.duplicates}"
