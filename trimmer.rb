@@ -8,26 +8,34 @@ end
 # assuming that this is being run from current directory
 gradles = procdir(ARGV[0] || ".")
 
+puts "Detected gradle files: \n#{gradles.join("\n")}\n"
 dependencies = gradles.map { |filepath|
   file = File.open(filepath, "rb")
-  contents = file.read.split("\n")
-  contents.reject { |line|
-    !line.include?("ompile")
+  content_lines = file.read.split("\n")
+  content_lines.select { |line|
+    line.include?("ompile")
+  }.map { |line|
+    line.scan(/\.*'(.*)\'/)
   }
 }.flatten
 
+puts "deps: #{dependencies}"
+
+
 def clean_dependencies(dependencies)
 #  Return just the bit between the quotes
-  dependencies.map {|dep|
+  dependencies.map { |dep|
     dep.scan(/\.*'(.*)\'/)
   }.flatten
 end
 
 clean = clean_dependencies(dependencies)
 
-duplicates = clean.select{|dep| clean.count(dep) > 1}.uniq
+puts "Detected dependencies: \n#{clean.join("\n")}\n\n"
 
-puts "Possible duplicate dependencies: #{duplicates.join("\n")}" # maybe add file that they are found in to this?
+duplicates = clean.select { |dep| clean.count(dep) > 1 }.uniq
+
+puts "Possible duplicate dependencies: \n#{duplicates.join("\n")}" # maybe add file that they are found in to this?
 
 # Possible problem: using gsub will remove all of one dependencies - so duplicates will go undetected.
 

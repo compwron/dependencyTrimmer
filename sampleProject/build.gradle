@@ -2,17 +2,20 @@ repositories {
     mavenCentral()
 }
 
+apply plugin: 'java'
+
+apply from: 'gradle/dependencies.gradle'
+
 project.buildDir = 'target'
 
 apply plugin: 'java'
 
 apply from: 'gradle/localDeploy.gradle'
-apply from: 'gradle/seedData.gradle'
 
 dependencies{
 	testCompile 'junit:junit:4.11'
 	compile 'org.mongodb:mongo-java-driver:2.11.1'
-	testCompile 'junit:junit:4.11' # duplicate
+	testCompile 'junit:junit:4.11' // duplicate
 }
 
 task otherTask(){
