@@ -3,12 +3,12 @@ class Dependencies
 
   def initialize files
     @dependencies = files.map { |file|
-      get_dependencies(file)
+      get_dependencies(File.open(file, "rb").read)
     }.flatten
   end
 
-  def get_dependencies file
-    File.open(file, "rb").read.split("\n").map { |dep|
+  def get_dependencies file_text
+    file_text.split("\n").map { |dep|
       dep.scan(/["|'](.*:.*):.*["|']/)
     }.flatten
   end
@@ -22,7 +22,14 @@ class Dependencies
   end
 
   def duplicates
+    duplicate_counts().reject { |dup_name, dup_count|
+      dup_count == 1
+    }.map { |dup_name, dup_count|
+      "found #{dup_count} times: #{dup_name}"
+    }.join("\n")
+  end
 
+  def duplicate_counts
     dup_hash = {}
     @dependencies.each { |dep|
       if (dup_hash[dep] == nil) then
@@ -31,11 +38,6 @@ class Dependencies
         dup_hash[dep] += 1
       end
     }
-
-    dup_hash.select { |dup_name, dup_count|
-      dup_count != 1
-    }.map { |dup_name, dup_count|
-      "found #{dup_count} times: #{dup_name}"
-    }.join("\n")
+    dup_hash
   end
 end
