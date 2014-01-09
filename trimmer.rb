@@ -8,26 +8,37 @@ end
 # assuming that this is being run from current directory
 gradles = procdir(ARGV[0] || ".")
 
-puts "Detected gradle files: \n#{gradles.join("\n")}\n"
-dependencies = gradles.map { |filepath|
-  file = File.open(filepath, "rb")
-  content_lines = file.read.split("\n")
-  content_lines.select { |line|
-    line.include?("ompile")
-  }.map { |line|
-    line.scan(/\.*'(.*)\'/)
-  }
-}.flatten
-
-puts "deps: #{dependencies}"
+def fits_dependency_format line
+  #puts line
+  true
+  matches = line.match(".*:.*:.*")
+  puts "matches? #{matches}"
+  matches
+end
 
 
 def clean_dependencies(dependencies)
 #  Return just the bit between the quotes
   dependencies.map { |dep|
-    dep.scan(/\.*'(.*)\'/)
+    dep.scan(/["|'](.*:.*):.*["|']/)
+    # ".*:.*:.*"
   }.flatten
 end
+
+puts "Detected gradle files: \n#{gradles.join("\n")}\n"
+dependencies = gradles.map { |filepath|
+  file = File.open(filepath, "rb")
+  content_lines = file.read.split("\n")
+  clean_dependencies(content_lines)
+  # content_lines.select { |line|
+    # line.include?("ompile") || fits_dependency_format(line)
+  # }
+}.flatten
+
+puts "deps: #{dependencies}"
+
+
+
 
 clean = clean_dependencies(dependencies)
 
