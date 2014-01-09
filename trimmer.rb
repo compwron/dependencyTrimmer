@@ -1,27 +1,23 @@
-# find all .gradle files 
 def procdir(dir)
   Dir[File.join(dir, '**', '*')].reject { |p|
     File.directory? p
   }.reject { |p| !p.include?(".gradle") }
 end
 
-def fits_dependency_format line
-  #puts line
-  true
-  matches = line.match(".*:.*:.*")
-  puts "matches? #{matches}"
-  matches
-end
-
 def clean_dependencies(dependencies)
-#  Return just the bit between the quotes
   dependencies.map { |dep|
     dep.scan(/["|'](.*:.*):.*["|']/)
-    # ".*:.*:.*"
   }.flatten
 end
 
-# assuming that this is being run from current directory
+def pretty_duplicates(dup_hash)
+  dup_hash.select { |dup_name, dup_count|
+    dup_count != 1
+  }.map { |dup_name, dup_count|
+    "found #{dup_count} times: #{dup_name}"
+  }.join("\n")
+end
+
 gradles = procdir(ARGV[0] || ".")
 
 puts "Detected gradle files: \n#{gradles.join("\n")}\n\n"
@@ -31,9 +27,8 @@ dependencies = gradles.map { |filepath|
   clean_dependencies(content_lines)
 }.flatten
 
-puts "Detected dependencies:
-  \ncount: #{dependencies.count}
-  \n#{dependencies.join("\n")}\n"
+puts "Detected #{dependencies.count} dependencies:
+     \n#{dependencies.join("\n")}\n"
 
 duplicates = {}
 
@@ -44,14 +39,6 @@ dependencies.each { |dep|
     duplicates[dep] += 1
   end
 }
-
-def pretty_duplicates(dup_hash)
-  dup_hash.select{ |dup_name, dup_count| 
-    dup_count != 1
-    }.map{|dup_name, dup_count|
-    "found #{dup_count} times: #{dup_name}"
-  }.join("\n")
-end
 
 puts "\nPossible duplicate dependencies: \n#{pretty_duplicates(duplicates)}" # maybe add file that they are found in to this?
 
