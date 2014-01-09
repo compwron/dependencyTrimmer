@@ -1,7 +1,11 @@
 def procdir(dir)
   Dir[File.join(dir, '**', '*')].reject { |p|
     File.directory? p
-  }.reject { |p| !p.include?(".gradle") }
+  }.reject { |p|
+    !p.include?(".gradle")
+  }.reject {|p|
+    p.include?("/out/")
+  }
 end
 
 def clean_dependencies(dependencies)
@@ -40,17 +44,4 @@ dependencies.each { |dep|
   end
 }
 
-puts "\nPossible duplicate dependencies: \n#{pretty_duplicates(duplicates)}" # maybe add file that they are found in to this?
-
-# Possible problem: using gsub will remove all of one dependencies - so duplicates will go undetected.
-
-
-# find everything in dependcy{} (to start with)
-
-# remove one dependency at a time, run tests from commandline
-# (alternative: understand the packages in the dependency and check import statements, 
-# but what about transitive dependencies?)
-
-# if tests pass, leave it out
-
-# print a report
+puts "\nPossible duplicate dependencies: \n#{pretty_duplicates(duplicates)}"
