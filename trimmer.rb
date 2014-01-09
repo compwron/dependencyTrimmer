@@ -5,9 +5,6 @@ def procdir(dir)
   }.reject { |p| !p.include?(".gradle") }
 end
 
-# assuming that this is being run from current directory
-gradles = procdir(ARGV[0] || ".")
-
 def fits_dependency_format line
   #puts line
   true
@@ -15,7 +12,6 @@ def fits_dependency_format line
   puts "matches? #{matches}"
   matches
 end
-
 
 def clean_dependencies(dependencies)
 #  Return just the bit between the quotes
@@ -25,28 +21,39 @@ def clean_dependencies(dependencies)
   }.flatten
 end
 
-puts "Detected gradle files: \n#{gradles.join("\n")}\n"
+# assuming that this is being run from current directory
+gradles = procdir(ARGV[0] || ".")
+
+puts "Detected gradle files: \n#{gradles.join("\n")}\n\n"
 dependencies = gradles.map { |filepath|
   file = File.open(filepath, "rb")
   content_lines = file.read.split("\n")
   clean_dependencies(content_lines)
-  # content_lines.select { |line|
-    # line.include?("ompile") || fits_dependency_format(line)
-  # }
 }.flatten
 
-puts "deps: #{dependencies}"
+puts "Detected dependencies:
+  \ncount: #{dependencies.count}
+  \n#{dependencies.join("\n")}\n"
 
+duplicates = {}
 
+dependencies.each { |dep|
+  if (duplicates[dep] == nil) then
+    duplicates.merge!({dep => 1})
+  else
+    duplicates[dep] += 1
+  end
+}
 
+def pretty_duplicates(dup_hash)
+  dup_hash.select{ |dup_name, dup_count| 
+    dup_count != 1
+    }.map{|dup_name, dup_count|
+    "found #{dup_count} times: #{dup_name}"
+  }.join("\n")
+end
 
-clean = clean_dependencies(dependencies)
-
-puts "Detected dependencies: \n#{clean.join("\n")}\n\n"
-
-duplicates = clean.select { |dep| clean.count(dep) > 1 }.uniq
-
-puts "Possible duplicate dependencies: \n#{duplicates.join("\n")}" # maybe add file that they are found in to this?
+puts "\nPossible duplicate dependencies: \n#{pretty_duplicates(duplicates)}" # maybe add file that they are found in to this?
 
 # Possible problem: using gsub will remove all of one dependencies - so duplicates will go undetected.
 
