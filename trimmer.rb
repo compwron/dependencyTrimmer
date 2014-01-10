@@ -26,6 +26,7 @@ def remove_from_first_instance_in_gradle_files files, dependency_name
 end
 
 def run_tests test_command
+  puts "running tests with command: #{test_command}"
   `test_command`
 end
 
