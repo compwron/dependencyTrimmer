@@ -43,12 +43,13 @@ all_dependencies_yml = 'config/dependencies.yml'
 all_dependencies = YAML::load_file(all_dependencies_yml) #Load
 all_dependencies['dependency_record'] = dependencies.dependencies
 File.open(all_dependencies_yml, 'w') {|f| f.write all_dependencies.to_yaml } #Store
-puts "I wrote: #{YAML::load_file(all_dependencies_yml) }"
+# puts "I wrote: #{YAML::load_file(all_dependencies_yml) }"
 
-trimmer_lock_file = "dependency_trimmer.lock"
+
 
 def commit_before_trimming path
-  `touch #{trimmer_lock_file} ; git add . ; git commit -m "About to start dependency trimming"`
+  trimmer_lock_file = "dependency_trimmer.lock"
+  `cd #{path} ; touch #{trimmer_lock_file} ; git add . ; git commit -m "About to start dependency trimming"`
   puts "Git committed dependency trimmer lockfile"
 end
 
