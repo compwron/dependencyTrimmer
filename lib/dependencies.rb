@@ -1,5 +1,5 @@
 class Dependencies
-  attr_accessor :dependencies
+  attr_reader :dependencies
 
   def initialize files
     @dependencies = files.map { |file|
