@@ -11,6 +11,15 @@ puts "\nPossible duplicate dependencies: \n#{dependencies.duplicates}"
 # given list of dependencies saved to file (as yml?), delete the first one from gradle file (once) and run command?
 require 'yaml' # Built in, no gem required
 
+
+# put all deps in yml
+# git commit
+# remove first instance
+# # run tests
+# if tests fail, reset to git commit and put dep name in required.yml
+# if tests pass, put dep name in not_required.yml and remove next dep
+
+
 # config = 'config/dependencies.yml'
 # d = YAML::load_file(config) #Load
 # d['content']['session'] = 2 #Modify
@@ -21,9 +30,15 @@ def remove_from_first_instance_in_gradle_files files, dependency_name
     contents = File.open(file, "rb").read
     if(contents).include?(dependency_name) then
       File.open(file, "w") {|file| file.puts contents.gsub(dependency_name, "")}
+      return true
     end
   }
+  return false
 end
+
+
+
+
 
 def run_tests test_command, dependency_name
   puts "running tests with command: #{test_command}"
