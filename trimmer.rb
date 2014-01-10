@@ -25,12 +25,21 @@ def remove_from_first_instance_in_gradle_files files, dependency_name
   }
 end
 
-def run_tests test_command
+def run_tests test_command, dependency_name
   puts "running tests with command: #{test_command}"
-  `test_command`
+  did_it_work = !`#{test_command}`.include?("FAILED")
+
+  # remove 
+  puts "did it work? #{did_it_work} -------"
+  did_it_work
 end
 
+did_it_work = true
+
 dependencies.dependencies.each {|dep|
-  remove_from_first_instance_in_gradle_files(gradles, dep)
-  run_tests(ARGV[1] || "gradle clean test")
+  did_it_work = remove_from_first_instance_in_gradle_files(gradles, dep)
+  if (!did_it_work) then 
+    return  
+  end
+  run_tests(ARGV[1] || "gradle clean test", dep)
 }
