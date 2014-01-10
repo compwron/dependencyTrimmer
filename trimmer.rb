@@ -20,10 +20,12 @@ require 'yaml' # Built in, no gem required
 # if tests pass, put dep name in not_required.yml and remove next dep
 
 
-# config = 'config/dependencies.yml'
-# d = YAML::load_file(config) #Load
-# d['content']['session'] = 2 #Modify
-# File.open(config, 'w') {|f| f.write d.to_yaml } #Store
+all_dependencies_yml = 'config/dependencies.yml'
+all_dependencies = YAML::load_file(all_dependencies_yml) #Load
+all_dependencies['dependency_record'] = dependencies.dependencies
+File.open(all_dependencies_yml, 'w') {|f| f.write all_dependencies.to_yaml } #Store
+
+puts "I wrote: #{YAML::load_file(all_dependencies_yml) }"
 
 def remove_from_first_instance_in_gradle_files files, dependency_name
   files.files.each {|file|
@@ -49,12 +51,12 @@ def run_tests test_command, dependency_name
   did_it_work
 end
 
-did_it_work = true
+# did_it_work = true
 
-dependencies.dependencies.each {|dep|
-  did_it_work = remove_from_first_instance_in_gradle_files(gradles, dep)
-  if (!did_it_work) then 
-    return  
-  end
-  run_tests(ARGV[1] || "gradle clean test", dep)
-}
+# dependencies.dependencies.each {|dep|
+#   did_it_work = remove_from_first_instance_in_gradle_files(gradles, dep)
+#   if (!did_it_work) then 
+#     return  
+#   end
+#   run_tests(ARGV[1] || "gradle clean test", dep)
+# }

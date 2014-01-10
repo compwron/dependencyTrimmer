@@ -4,3 +4,4 @@
 target
 .bundle
 coverage
+dependencies.yml
