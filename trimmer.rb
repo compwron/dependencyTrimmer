@@ -2,8 +2,10 @@ require 'yaml'
 require_relative 'lib/gradle_files'
 require_relative 'lib/dependencies'
 
+project_directory = ARGV[0] || "."
 
-gradles = GradleFiles.new(ARGV[0] || ".")
+
+gradles = GradleFiles.new(project_directory)
 puts "Detected gradle files: \n#{gradles.pretty}\n\n"
 
 dependencies = Dependencies.new(gradles.files)
@@ -11,10 +13,14 @@ puts "Detected #{dependencies.count} dependencies:\n#{dependencies.pretty}\n"
 puts "\nPossible duplicate dependencies: \n#{dependencies.duplicates}"
 
 def remove_from_first_instance_in_gradle_files files, dependency_name
+
+  # must remove only one, and must remove the entire dependency, including 'classpath' if it is there. 
   files.files.each {|file|
     contents = File.open(file, "rb").read
     if(contents).include?(dependency_name) then
-      File.open(file, "w") {|file| file.puts contents.gsub(dependency_name, "")}
+      File.open(file, "w") {|file| 
+        file.puts contents.sub(dependency_name, "")
+      }
       puts "Removed dependency #{dependency_name}"
       return true
     end
@@ -45,17 +51,26 @@ all_dependencies['dependency_record'] = dependencies.dependencies
 File.open(all_dependencies_yml, 'w') {|f| f.write all_dependencies.to_yaml } #Store
 # puts "I wrote: #{YAML::load_file(all_dependencies_yml) }"
 
+trimmer_lock_file = "dependency_trimmer.lock"
 
 
-def commit_before_trimming path
-  trimmer_lock_file = "dependency_trimmer.lock"
+def commit_before_trimming path, trimmer_lock_file
   `cd #{path} ; touch #{trimmer_lock_file} ; git add . ; git commit -m "About to start dependency trimming"`
   puts "Git committed dependency trimmer lockfile"
 end
 
-commit_before_trimming(ARGV[0])
+def revert_to_pretrim_commit path, trimmer_lock_file
+  `git reset HEAD --hard`
+  puts "reset gradle dependency file changes"
+  `rm #{trimmer_lock_file}`
+  puts "removed trimmer lock file"
+end
+
+commit_before_trimming(project_directory, trimmer_lock_file)
 
 remove_from_first_instance_in_gradle_files(gradles, dependencies.dependencies.first)
+
+revert_to_pretrim_commit(project_directory, trimmer_lock_file)
 
 
 
