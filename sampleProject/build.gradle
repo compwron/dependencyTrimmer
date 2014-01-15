@@ -1,3 +1,13 @@
+buildscript {
+  repositories {
+    mavenCentral()
+  }
+
+  dependencies {
+    classpath 'com.github.ben-manes:gradle-versions-plugin:0.4'
+  }
+}
+
 repositories {
     mavenCentral()
 }
@@ -8,6 +18,8 @@ configurations {
 }
 
 apply plugin: 'java'
+apply plugin: 'project-reports'
+apply plugin: 'versions'
 
 apply from: 'gradle/dependencies.gradle'
 
@@ -21,7 +33,7 @@ dependencies{
 	testCompile 'junit:junit:4.11'
 	compile 'org.mongodb:mongo-java-driver:2.11.1'
 	testCompile 'junit:junit:4.11' // duplicate
-	isoSegment 'junit:junit:4.11' // duplicate
+	isoSegment 'junit:junit:4.10' // duplicate
 }
 
 task otherTask(){

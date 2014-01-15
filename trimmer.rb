@@ -60,10 +60,8 @@ def commit_before_trimming path, trimmer_lock_file
 end
 
 def revert_to_pretrim_commit path, trimmer_lock_file
-  `git reset HEAD --hard`
-  puts "reset gradle dependency file changes"
-  `rm #{trimmer_lock_file}`
-  puts "removed trimmer lock file"
+  `git reset HEAD~1 --hard`
+  puts "reset gradle dependency file changes, removed lockfile"
 end
 
 commit_before_trimming(project_directory, trimmer_lock_file)
